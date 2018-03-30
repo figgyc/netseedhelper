@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "3ds",
+            "includePath": [
+                "${workspaceRoot}",
+                "C:\\devkitPro\\libctru\\include\\",
+                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\",
+                "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\7.1.0\\include",
+                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\7.1.0",
+                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\7.1.0\\stdlib.h",
+                "C:\\devkitPro\\devkitARM\\arm-none-eabi\\include\\c++\\7.1.0\\arm-none-eabi",
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/external/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 3
+}
