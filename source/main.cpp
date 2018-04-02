@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sstream>
+#include <list>
 
 #include <string.h>
 #include <stdlib.h>
@@ -149,6 +150,13 @@ typedef struct
 	frd_key key;
 } friend_notif_event;
 
+typedef struct
+{
+	u64 local_friend_code;
+	u64 friend_code;
+} friend_things;
+std::list<friend_things> friendsToProcess;
+
 Result FRD_GetEventNotification(friend_notif_event *event, size_t size, u32 *recieved_notif_count)
 {
 	Result ret = 0;
@@ -212,26 +220,11 @@ void HandleFriendNotification(friend_notif_event *event)
 		u64 friendCode;
 		FRD_PrincipalIdToFriendCode(event->key.principal_id, &friendCode);
 		FRD_RemoveFriend(event->key.principal_id, event->key.local_friend_code);
-		printf("x");
-		char url[256]; // should be 61 max in theory (url is 40, 12 fc, 8 lfcs, 1 nullbyte) but lets be safe
-		sprintf(url, "http://seedhelper.figgyc.uk/lfcs/%lld?lfcs=%0llx", friendCode, event->key.local_friend_code);
-		printf("%s\n", url);
-		u8 *dlBuf = nullptr;
-		u32 outputSize = 0;
-		//httpGet(url, &dlBuf, &outputSize); 	
-		try
-		{
-			httpGet(url, &dlBuf, &outputSize);
-		}
-		catch (std::runtime_error &e)
-		{
-			std::cout << e.what() << std::endl;
-			FILE* fp = fopen("log.txt", "wb");
-			fprintf(fp, e.what(), 256);
-			fwrite(dlBuf, sizeof dlBuf[0], outputSize, fp);
-			fclose(fp);
-		} //*/
-		printf("uploaded lfcs to database and removed friend");
+		friend_things thisFriend;
+		thisFriend.friend_code = friendCode;
+		thisFriend.local_friend_code = event->key.local_friend_code;
+		friendsToProcess.push_back(thisFriend);
+		printf("added 2 upload Q and removed");
 	}
 	break;
 
@@ -359,7 +352,8 @@ int main(void)
 			while (getline(is, line))
 			{
 				// process line
-				if (line == "") {
+				if (line == "")
+				{
 					break;
 				}
 				char fc[line.length() + 1];
@@ -367,14 +361,14 @@ int main(void)
 				u64 fcInt;
 				sscanf(fc, "%lld", &fcInt);
 				printf("exo %s, %lld\n", fc, fcInt);
-				/*printf("FRD_FriendCodeIsValid() %08lX \n", */FRD_IsValidFriendCode(fcInt, &pid);//);
+				/*printf("FRD_FriendCodeIsValid() %08lX \n", */ FRD_IsValidFriendCode(fcInt, &pid); //);
 				printf("fc is valid: %s\n", (pid == 1) ? "True" : "False");
 				if (pid == 1)
 				{
-					/*printf("FRD_FriendCodeToPrincipalId() %08lx\n", */FRD_FriendCodeToPrincipalId(fcInt, &pid_2);//);
-					//printf("Principal_id %lx\n", pid_2);
-					/*printf("FRD_addFriend() %08lx\n", */FRD_addFriendOnline(event, pid_2);//);
-					char url[128]; // should be 61 max in theory (url is 40, 12 fc, 8 lfcs, 1 nullbyte) but lets be safe
+					/*printf("FRD_FriendCodeToPrincipalId() %08lx\n", */ FRD_FriendCodeToPrincipalId(fcInt, &pid_2); //);
+																													 //printf("Principal_id %lx\n", pid_2);
+					/*printf("FRD_addFriend() %08lx\n", */ FRD_addFriendOnline(event, pid_2);						 //);
+					char url[128];																					 // should be 61 max in theory (url is 40, 12 fc, 8 lfcs, 1 nullbyte) but lets be safe
 					sprintf(url, "https://seedhelper.figgyc.uk/added/%s", fc);
 					printf("%s\n", url);
 					u8 *dlBuf = nullptr;
@@ -388,7 +382,7 @@ int main(void)
 					{
 						std::cout << e.what() << std::endl;
 					} //*/
-					// printf("%s\n", dlBuf);
+					  // printf("%s\n", dlBuf);
 				}
 			}
 			svcSleepThread(10 * 1e9);
@@ -398,6 +392,30 @@ int main(void)
 		//FILE *file = fopen("_test_", "wb+");
 		//fwrite(dlBuf, outputSize, 1, file);
 		//fclose(file);
+		while (friendsToProcess.size() > 0)
+		{
+			friend_things friendThing = friendsToProcess.front();
+			char url[256]; // should be 61 max in theory (url is 40, 12 fc, 8 lfcs, 1 nullbyte) but lets be safe
+			sprintf(url, "http://seedhelper.figgyc.uk/lfcs/%lld?lfcs=%0llx", friendThing.friend_code, friendThing.local_friend_code);
+			printf("%s\n", url);
+			u8 *dlBuf = nullptr;
+			u32 outputSize = 0;
+			//httpGet(url, &dlBuf, &outputSize);
+			try
+			{
+				httpGet(url, &dlBuf, &outputSize);
+			}
+			catch (std::runtime_error &e)
+			{
+				std::cout << e.what() << std::endl;
+				FILE *fp = fopen("log.txt", "wb");
+				fprintf(fp, e.what(), 256);
+				fwrite(dlBuf, sizeof dlBuf[0], outputSize, fp);
+				fclose(fp);
+			} //*/
+			printf("uploaded lfcs to database");
+			friendsToProcess.pop_front();
+		}
 		hidScanInput();
 		if (keysDown() & KEY_START)
 		{
@@ -412,7 +430,7 @@ int main(void)
 	threadJoin(thread, U64_MAX);
 	svcCloseHandle(s_terminate);
 	GSPLCD_PowerOnAllBacklights();
-	aptSetSleepAllowed(true);	
+	aptSetSleepAllowed(true);
 	frdExit();
 	httpc.Exit();
 	gfxExit();
