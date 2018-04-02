@@ -306,8 +306,8 @@ int main(void)
 	svcCreateEvent(&s_terminate, RESET_ONESHOT);
 	printf("Going To init thread\n");
 	Thread thread = threadCreate(FriendNotificationHandlerThread, NULL, 4096 * 2, 0x24, 0, true);
-	//printf("Press A to continue\n");
-
+	printf("Press A to continue\n");
+	svcSleepThread(5 * 1e9);
 	// anti burn in measures
 	//GSPGPU_SetLcdForceBlack(1);
 	GSPLCD_PowerOffAllBacklights();
@@ -388,7 +388,7 @@ int main(void)
 					{
 						std::cout << e.what() << std::endl;
 					} //*/
-					printf("%s\n", dlBuf);
+					// printf("%s\n", dlBuf);
 				}
 			}
 			svcSleepThread(10 * 1e9);
