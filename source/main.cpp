@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <list>
+#include <ctime>
 
 #include <string.h>
 #include <stdlib.h>
@@ -157,6 +158,12 @@ typedef struct
 } friend_things;
 std::list<friend_things> friendsToProcess;
 
+typedef struct {
+	u64 friend_code;
+	std::time_t timeAdded;
+} friend_process;
+std::list<friend_process> friendsToKill;
+
 Result FRD_GetEventNotification(friend_notif_event *event, size_t size, u32 *recieved_notif_count)
 {
 	Result ret = 0;
@@ -225,6 +232,7 @@ void HandleFriendNotification(friend_notif_event *event)
 		thisFriend.local_friend_code = event->key.local_friend_code;
 		friendsToProcess.push_back(thisFriend);
 		printf("added 2 upload Q and removed");
+		friendsToKill.remove_if([&friendCode](friend_process n){ return n.friend_code == friendCode; });
 	}
 	break;
 
@@ -341,7 +349,7 @@ int main(void)
 			gfxFlushBuffers();
 			gfxSwapBuffers();
 			svcSleepThread(5 * 1e9);
-			consoleClear();
+			//consoleClear();
 			//printf("wait finished \n");
 		}
 		else
@@ -366,8 +374,11 @@ int main(void)
 				if (pid == 1)
 				{
 					/*printf("FRD_FriendCodeToPrincipalId() %08lx\n", */ FRD_FriendCodeToPrincipalId(fcInt, &pid_2); //);
-																													 //printf("Principal_id %lx\n", pid_2);
 					/*printf("FRD_addFriend() %08lx\n", */ FRD_addFriendOnline(event, pid_2);						 //);
+					friend_process theDude;
+					theDude.friend_code = fcInt;
+					theDude.timeAdded = std::time(nullptr);
+					friendsToKill.push_back(theDude);
 					char url[128];																					 // should be 61 max in theory (url is 40, 12 fc, 8 lfcs, 1 nullbyte) but lets be safe
 					sprintf(url, "https://seedhelper.figgyc.uk/added/%s", fc);
 					printf("%s\n", url);
@@ -415,6 +426,18 @@ int main(void)
 			} //*/
 			printf("uploaded lfcs to database");
 			friendsToProcess.pop_front();
+		}
+		for (friend_process const& it : friendsToKill) {
+			if (std::difftime(std::time(nullptr), it.timeAdded) > 600) {
+				u32 principalId;
+				FRD_FriendCodeToPrincipalId(it.friend_code, &principalId);
+				Result result = FRD_RemoveFriend(principalId, it.friend_code);
+				if (result != 0) {
+					printf("Friend removal error %ld", result);
+				} else {
+					printf("Friend expired and removed successfully");
+				}
+			}
 		}
 		hidScanInput();
 		if (keysDown() & KEY_START)
