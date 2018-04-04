@@ -427,16 +427,17 @@ int main(void)
 			printf("uploaded lfcs to database");
 			friendsToProcess.pop_front();
 		}
-		for (friend_process const& it : friendsToKill) {
-			if (std::difftime(std::time(nullptr), it.timeAdded) > 600) {
+		for (std::list<friend_process>::iterator it = friendsToKill.begin(); it != friendsToKill.end(); ++it) {
+			if (std::difftime(std::time(nullptr), it->timeAdded) > 600) {
 				u32 principalId;
-				FRD_FriendCodeToPrincipalId(it.friend_code, &principalId);
-				Result result = FRD_RemoveFriend(principalId, it.friend_code);
+				FRD_FriendCodeToPrincipalId(it->friend_code, &principalId);
+				Result result = FRD_RemoveFriend(principalId, it->friend_code);
 				if (result != 0) {
 					printf("Friend removal error %ld", result);
 				} else {
 					printf("Friend expired and removed successfully");
 				}
+				friendsToKill.erase(it);
 			}
 		}
 		hidScanInput();
