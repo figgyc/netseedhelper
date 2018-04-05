@@ -328,20 +328,20 @@ int main(void)
 		//frd_code = 319677776123;
 		//frd_code = 401256349967;
 		alternator = !alternator;
-		u8 *dlBuf = nullptr;
+		u8 *dlBuf1 = nullptr;
 		u32 outputSize = 0;
 		const char *url = "https://seedhelper.figgyc.uk/getfcs";
 		printf("%s\n", url);
 		try
 		{
-			httpGet(url, &dlBuf, &outputSize);
+			httpGet(url, &dlBuf1, &outputSize);
 		}
 		catch (std::runtime_error &e)
 		{
 			std::cout << e.what();
 		}
 		//printf("done\n");
-		std::string tmpstr(reinterpret_cast<char const *>(dlBuf), outputSize); // length optional, but needed if there may be zero's in your data
+		std::string tmpstr(reinterpret_cast<char const *>(dlBuf1), outputSize); // length optional, but needed if there may be zero's in your data
 
 		if (tmpstr == "nothing")
 		{
@@ -394,6 +394,7 @@ int main(void)
 						std::cout << e.what() << std::endl;
 					} //*/
 					  // printf("%s\n", dlBuf);
+					free(dlBuf);					  
 				}
 			}
 			svcSleepThread(10 * 1e9);
@@ -427,6 +428,7 @@ int main(void)
 			printf("uploaded lfcs to database");
 			friendsToProcess.pop_front();
 			delete &friendThing;
+			free(dlBuf);
 		}
 		for (std::list<friend_process>::iterator it = friendsToKill.begin(); it != friendsToKill.end(); ++it) {
 			if (std::difftime(std::time(nullptr), it->timeAdded) > 600) {
@@ -442,6 +444,7 @@ int main(void)
 				delete &*it;
 			}
 		}
+		free(dlBuf1);
 		hidScanInput();
 		if (keysDown() & KEY_START)
 		{
