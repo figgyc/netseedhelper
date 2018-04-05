@@ -427,7 +427,7 @@ int main(void)
 			} //*/
 			printf("uploaded lfcs to database");
 			friendsToProcess.pop_front();
-			delete &friendThing;
+			//delete &friendThing;
 			free(dlBuf);
 		}
 		for (std::list<friend_process>::iterator it = friendsToKill.begin(); it != friendsToKill.end(); ++it) {
