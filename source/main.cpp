@@ -408,7 +408,7 @@ int main(void)
 		{
 			friend_things friendThing = friendsToProcess.front();
 			char url[256]; // should be 61 max in theory (url is 40, 12 fc, 8 lfcs, 1 nullbyte) but lets be safe
-			sprintf(url, "http://seedhelper.figgyc.uk/lfcs/%lld?lfcs=%0llx", friendThing.friend_code, friendThing.local_friend_code);
+			sprintf(url, "http://seedhelper.figgyc.uk/lfcs/%lld?lfcs=%016llx", friendThing.friend_code, friendThing.local_friend_code);
 			printf("%s\n", url);
 			u8 *dlBuf = nullptr;
 			u32 outputSize = 0;
