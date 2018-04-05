@@ -441,7 +441,7 @@ int main(void)
 					printf("Friend expired and removed successfully");
 				}
 				friendsToKill.erase(it);
-				delete &*it;
+				//delete &*it;
 			}
 		}
 		free(dlBuf1);
