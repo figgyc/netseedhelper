@@ -426,6 +426,7 @@ int main(void)
 			} //*/
 			printf("uploaded lfcs to database");
 			friendsToProcess.pop_front();
+			delete &friendThing;
 		}
 		for (std::list<friend_process>::iterator it = friendsToKill.begin(); it != friendsToKill.end(); ++it) {
 			if (std::difftime(std::time(nullptr), it->timeAdded) > 600) {
@@ -438,6 +439,7 @@ int main(void)
 					printf("Friend expired and removed successfully");
 				}
 				friendsToKill.erase(it);
+				delete &*it;
 			}
 		}
 		hidScanInput();
