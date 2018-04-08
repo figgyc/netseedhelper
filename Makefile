@@ -134,6 +134,9 @@ endif
 #---------------------------------------------------------------------------------
 all: $(BUILD)
 
+cia: all
+	@makerom -f cia -o mset.cia
+
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile

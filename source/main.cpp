@@ -341,7 +341,12 @@ int main(void)
 			std::cout << e.what();
 		}
 		//printf("done\n");
-		std::string tmpstr(reinterpret_cast<char const *>(dlBuf1), outputSize); // length optional, but needed if there may be zero's in your data
+		std::string tmpstr;
+		if (dlBuf1 != NULL) {
+			tmpstr = std::string(reinterpret_cast<char const *>(dlBuf1), outputSize); // length optional, but needed if there may be zero's in your data			
+		} else {
+			tmpstr = "nothing";
+		}
 
 		if (tmpstr == "nothing")
 		{
@@ -394,7 +399,7 @@ int main(void)
 						std::cout << e.what() << std::endl;
 					} //*/
 					  // printf("%s\n", dlBuf);
-					free(dlBuf);					  
+					if (dlBuf != NULL) free(dlBuf);					  
 				}
 			}
 			svcSleepThread(10 * 1e9);
@@ -428,7 +433,7 @@ int main(void)
 			printf("uploaded lfcs to database");
 			friendsToProcess.pop_front();
 			//delete &friendThing;
-			free(dlBuf);
+			if (dlBuf != NULL) free(dlBuf);					  
 		}
 		for (std::list<friend_process>::iterator it = friendsToKill.begin(); it != friendsToKill.end(); ++it) {
 			if (std::difftime(std::time(nullptr), it->timeAdded) > 600) {
@@ -444,8 +449,20 @@ int main(void)
 				//delete &*it;
 			}
 		}
-		free(dlBuf1);
+		if (dlBuf1 != NULL) free(dlBuf1);
 		hidScanInput();
+		if (keysDown() & KEY_X) {
+			printf("Wrote nonzero to initsetup config save");
+			u32 cfgData = 0x08007FF4; // idk if the val matters but 2dsaver uses this
+			CFG_SetConfigInfoBlk4(4, 0x00110000, (u8*)&cfgData);
+			CFG_UpdateConfigSavegame();
+		}
+		if (keysDown() & KEY_Y) {
+			printf("Wrote zero to initsetup config save");
+			u32 cfgData = 0x00000000;
+			CFG_SetConfigInfoBlk4(4, 0x00110000, (u8*)&cfgData);
+			CFG_UpdateConfigSavegame();
+		}
 		if (keysDown() & KEY_START)
 		{
 			break;
