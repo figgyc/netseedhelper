@@ -445,7 +445,7 @@ int main(void)
 				} else {
 					printf("Friend expired and removed successfully");
 				}
-				//friendsToKill.erase(it);
+				it = friendsToKill.erase(it);
 				//delete &*it;
 			}
 		}
